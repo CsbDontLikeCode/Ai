@@ -4,6 +4,8 @@
 #include <stb_image.h>
 #include <iostream>
 
+#include <GLFW/glfw3.h>
+
 namespace Ai 
 {
     // --------------------------------------------------
@@ -20,6 +22,9 @@ namespace Ai
     GLFWwindow* window;
     static unsigned int SCR_WIDTH = 1000;
     static unsigned int SCR_HEIGHT = 1000;
+
+    ImGuiIO& io = imguiSetupContext();
+    imguiSetupPlatform(window);
     
     // Camera to generate view transformation matrix.
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
