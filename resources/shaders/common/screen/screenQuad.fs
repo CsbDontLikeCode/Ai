@@ -9,6 +9,10 @@ void main()
 {   
     // Normal
     vec3 col = texture(screenTexture, TexCoords).rgb;
+
+    float gamma = 1.5;
+    col = pow(col, vec3(1.0/gamma));
+
     FragColor = vec4(col, 1.0);
 
     //// Inversion
