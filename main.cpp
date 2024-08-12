@@ -61,7 +61,7 @@ int main()
 	auto& quadRotate = quad->getRotate();
 	quadRotate.x = -90;
 	//material
-	Ai::Material material{ {0.174f, 0.0117f, 0.0117f}, {0.61424f, 0.04136f,  0.04136f}, {0.7278f, 0.626959f, 0.626959f}, 32.0f };
+	Ai::Material material{ {0.174f, 0.0117f, 0.0117f}, {0.61424f, 0.04136f,  0.04136f}, {0.7278f, 0.626959f, 0.626959f}, 128.0f };
 	quad->setMaterail(material);
 
 	// Demo4

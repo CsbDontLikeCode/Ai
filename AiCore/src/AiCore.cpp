@@ -4,7 +4,6 @@
 #include <stb_image.h>
 #include <iostream>
 
-
 namespace Ai 
 {
     // --------------------------------------------------
@@ -325,8 +324,6 @@ namespace Ai
             glGenRenderbuffers(1, &rbo);
             glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 
-            
-
             if (g_AiEngineConfig.antiAliasing) 
             {
                 glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, offScreenTexture);
@@ -571,6 +568,8 @@ namespace Ai
         {
             glDeleteProgram(iter->second);
         }
+
+        glfwTerminate();
     }
 
     void setDirLight(glm::vec3 direction, glm::vec3 color)
