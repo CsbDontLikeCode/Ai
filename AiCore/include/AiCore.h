@@ -28,6 +28,7 @@ namespace Ai
 		// RE Cinfog 1 >> Use off-screen rendering or not.
 		bool offScreenRenderingFlag = false;
 		bool antiAliasing = false;
+		bool shadowMapping = true;
 	};
 
 	AiEngineConfig& getAiEngineConfig();

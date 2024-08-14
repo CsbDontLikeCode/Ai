@@ -303,11 +303,18 @@ namespace Ai
 
         SkyBoxTexture skyboxTexture("resources/textures/skybox/default");
 
+        // Shadow Mapping Shader
+        Shader shaderMappingShader("resources/shaders/common/shadow/shadowMapping.vs", "resources/shaders/common/shadow/shadowMapping.fs");
+
         // Off-Screen framebuffer configuration
-        // -------------------------
         unsigned int offScreenFramebuffer;
         unsigned int offScreenTexture;
         unsigned int rbo;
+
+        // Shadow mapping framebuffer.
+        unsigned int shadowMappingFramebuffer;
+        const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+        unsigned int shadowMappingDepthTexture;
 
         // configure second post-processing framebuffer
         unsigned int antialisingFramebuffer;
@@ -364,6 +371,25 @@ namespace Ai
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
+        if (g_AiEngineConfig.shadowMapping)
+        {
+            glGenFramebuffers(1, &shadowMappingFramebuffer);
+
+            glGenTextures(1, &shadowMappingDepthTexture);
+            glBindTexture(GL_TEXTURE_2D, shadowMappingDepthTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMappingDepthTexture, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
         while (!glfwWindowShouldClose(window))
         {
             float currentFrame = static_cast<float>(glfwGetTime());
@@ -377,12 +403,6 @@ namespace Ai
             // camera/view transformation
             glm::mat4 view = camera.GetViewMatrix();
 
-            // Bind the off-screen framebuffer.
-            if (g_AiEngineConfig.offScreenRenderingFlag) 
-            {
-                glBindFramebuffer(GL_FRAMEBUFFER, offScreenFramebuffer);
-            }
-
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -391,8 +411,40 @@ namespace Ai
                 glEnable(GL_MULTISAMPLE);
             }
             
-            if (RenderPainterVector.size() != 0 || RenderObjectVector.size() != 0) 
+            if (RenderPainterVector.size() != 0 || RenderObjectVector.size() != 0)
             {
+                float near_plane = 1.0f, far_plane = 7.5f;
+                glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+                glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+                shaderMappingShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+                if (g_AiEngineConfig.shadowMapping)
+                {
+                    // Rendering shadow mapping depth texture first.
+                    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                    glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
+                    glClear(GL_DEPTH_BUFFER_BIT);
+                    glEnable(GL_DEPTH_TEST);
+                    
+                    // Render the scene
+                    for (int i = 0; i < RenderObjectVector.size(); i++)
+                    {
+                        shaderMappingShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+                        RenderObjectVector[i]->drawShadowMapping(shaderMappingShader);
+                    }
+
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+
+                // Bind the off-screen framebuffer.
+                if (g_AiEngineConfig.offScreenRenderingFlag)
+                {
+                    glBindFramebuffer(GL_FRAMEBUFFER, offScreenFramebuffer);
+                }
+
+                glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 int vertexScaleLocation;
                 int vertexPosLocation;
                 int vertexColorLocation;
@@ -406,22 +458,28 @@ namespace Ai
                     RenderObjectVector[i]->draw();
                 }
 
+                //for (int i = 0; i < RenderObjectVector.size(); i++)
+                //{
+                //    shaderMappingShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+                //    RenderObjectVector[i]->drawShadowMapping(shaderMappingShader);
+                //}
+
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 for (auto transparency : TransparencyContainer)
                 {
                     // TODO-1::Two pass transparency rendering, one for back face and one for front face.
                     // TODO-2::Reoreder the transparency container by distance.
-                    glEnable(GL_CULL_FACE);
+                    //glEnable(GL_CULL_FACE);
                     // Set front face surround order.
                     // CCW means Conuterclockwise, and CW means Clockwise.
-                    glFrontFace(GL_CW);
+                    //glFrontFace(GL_CW);
                     // Select culling face.
-                    glCullFace(GL_BACK);
+                    //glCullFace(GL_BACK); // TODO...
                     transparency->getView() = view;
                     transparency->getProjection() = projection;
                     transparency->draw();
-                    glDisable(GL_CULL_FACE);
+                    //glDisable(GL_CULL_FACE);
                 }
                 glDisable(GL_BLEND);
 
@@ -541,11 +599,12 @@ namespace Ai
 
                 if (g_AiEngineConfig.antiAliasing)
                 {
-                    glBindTexture(GL_TEXTURE_2D, screenTexture);
+                    //glBindTexture(GL_TEXTURE_2D, screenTexture);
+                    glBindTexture(GL_TEXTURE_2D, shadowMappingDepthTexture);
                 }
                 else
                 {
-                    glBindTexture(GL_TEXTURE_2D, offScreenTexture);
+                     glBindTexture(GL_TEXTURE_2D, offScreenTexture);
                 }
                
                 glDrawArrays(GL_TRIANGLES, 0, 6);

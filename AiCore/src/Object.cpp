@@ -150,6 +150,22 @@ namespace Ai {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
+	// You need to set shader first.
+	void AiTexQuadObject::drawShadowMapping(Shader& shader)
+	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
+		
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+
     unsigned int AiTexQuadObject::initShader() noexcept
 	{
 		unsigned int vertexShader;
@@ -236,6 +252,21 @@ namespace Ai {
 		glUniform4fv(colorLoc, 1, glm::value_ptr(m_color));
 
 		// Bind m_VAO.
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	}
+
+	void AiPureCubeObject::drawShadowMapping(Shader& shader)
+	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
+
 		glBindVertexArray(m_VAO);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	}
@@ -350,6 +381,21 @@ namespace Ai {
 		m_shader->setFloat("material.shininess", m_material.shininess);
 
 		// Bind m_VAO.
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+
+	void AiQuad::drawShadowMapping(Shader& shader)
+	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
+
 		glBindVertexArray(m_VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
@@ -480,6 +526,21 @@ namespace Ai {
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void AiQuadLM::drawShadowMapping(Shader& shader)
+	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
+
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	}
 
 	void AiQuadLM::init()
@@ -758,6 +819,21 @@ namespace Ai {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void TranslucentAiQuad::drawShadowMapping(Shader& shader)
+	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
+
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
 	void TranslucentAiQuad::updateDistance()

@@ -117,6 +117,8 @@ namespace Ai
 
 		virtual void draw() = 0;
 
+		virtual void drawShadowMapping(Shader& shader) {};
+
 		virtual glm::vec3& getTranslate();
 
 		virtual glm::vec3& getRotate();
@@ -147,6 +149,7 @@ namespace Ai
 
 		virtual void draw() override;
 
+		virtual void drawShadowMapping(Shader& shader) override;
 	protected:
 		virtual void init() override;
 
@@ -206,6 +209,8 @@ namespace Ai
 		~AiPureCubeObject();
 
 		virtual void draw() override;
+
+		virtual void drawShadowMapping(Shader& shader) override;
 
 		void setColor(float r, float g, float b);
 	private:
@@ -298,6 +303,8 @@ namespace Ai
 		void setMaterail(Material& material);
 
 		virtual void draw() override;
+
+		virtual void drawShadowMapping(Shader& shader) override;
 	private:
 		virtual void init() override;
 	private:
@@ -343,6 +350,8 @@ namespace Ai
 		void changeSelectedState();
 
 		virtual void draw() override;
+
+		virtual void drawShadowMapping(Shader& shader) override;
 	private:
 		virtual void init() override;
 
@@ -381,6 +390,9 @@ namespace Ai
 		}
 
 		void draw() override;
+		
+		// TODO::......
+		//virtual void drawShadowMapping(Shader& shader) override;
 	private:
 		virtual void init() override
 		{
@@ -424,6 +436,8 @@ namespace Ai
 		~TranslucentAiQuad();
 
 		virtual void draw() override;
+
+		virtual void drawShadowMapping(Shader& shader) override;
 
 		virtual void updateDistance() override;
 
