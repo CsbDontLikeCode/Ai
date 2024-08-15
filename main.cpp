@@ -32,6 +32,9 @@ int main()
 
 	// Demo1
 	std::shared_ptr<Ai::AiTexQuadObject> tex = Ai::addTex(8, "azibao", "resources/textures/azi1.jpg");
+	auto& posAzi = tex->getTranslate();
+	posAzi.z = 0.5f;
+
 	auto tex2 = Ai::addTex(9, "azibao", "resources/textures/azibao.jpg");
 	auto& translation = tex2->getTranslate();
 	translation.x = 2.0f;
@@ -54,7 +57,7 @@ int main()
 	auto sp_pl = std::make_shared<Ai::PointLight>(lightSorcePosition, plColor);
 	auto quad = Ai::addAiQuad(10, basicShader, sp_pl);
 	auto& quadScale = quad->getScale();
-	quadScale = glm::vec3(2.0f);
+	quadScale = glm::vec3(20.0f);
 	auto& quadPosition = quad->getTranslate();
 	quadPosition.z = 1.0f;
 	quadPosition.y = -0.5f;

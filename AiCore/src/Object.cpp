@@ -8,6 +8,9 @@ namespace Ai {
 	//extern const int maxPointLightNum;
 	extern std::vector<SceneLight> g_pointLights;
 
+	extern glm::mat4 g_lightSpaceMatrix;
+	extern unsigned int g_shadowMappingDepthTexture;
+
 	// ----------------------------------------------------------------------------------------------------
 	// Class PointLight
 	PointLight::PointLight(glm::vec3 position, glm::vec3 color)
@@ -369,6 +372,7 @@ namespace Ai {
 		m_shader->setMat4("model", model);
 		m_shader->setMat4("view", m_view);
 		m_shader->setMat4("projection", m_projection);
+		m_shader->setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
 
 		// Set lighting calculation items.
 		m_shader->setVec3("lightPos", m_lightSource->getPosition());
@@ -379,6 +383,9 @@ namespace Ai {
 		m_shader->setVec3("material.diffuse", m_material.diffuse);
 		m_shader->setVec3("material.specular", m_material.specular);
 		m_shader->setFloat("material.shininess", m_material.shininess);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, g_shadowMappingDepthTexture);
 
 		// Bind m_VAO.
 		glBindVertexArray(m_VAO);

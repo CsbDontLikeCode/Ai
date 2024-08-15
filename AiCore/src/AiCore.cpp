@@ -16,6 +16,13 @@ namespace Ai
     // 2.Point light container
     std::vector<SceneLight> g_pointLights;
 
+    float near_plane = 1.0f, far_plane = 7.5f;
+    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 g_lightSpaceMatrix = lightProjection * lightView;
+
+    unsigned int g_shadowMappingDepthTexture;
+
     // Rendering window configuration.
     GLFWwindow* window;
     static unsigned int SCR_WIDTH = 1000;
@@ -313,8 +320,7 @@ namespace Ai
 
         // Shadow mapping framebuffer.
         unsigned int shadowMappingFramebuffer;
-        const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-        unsigned int shadowMappingDepthTexture;
+        const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
 
         // configure second post-processing framebuffer
         unsigned int antialisingFramebuffer;
@@ -375,8 +381,8 @@ namespace Ai
         {
             glGenFramebuffers(1, &shadowMappingFramebuffer);
 
-            glGenTextures(1, &shadowMappingDepthTexture);
-            glBindTexture(GL_TEXTURE_2D, shadowMappingDepthTexture);
+            glGenTextures(1, &g_shadowMappingDepthTexture);
+            glBindTexture(GL_TEXTURE_2D, g_shadowMappingDepthTexture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -384,7 +390,7 @@ namespace Ai
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
             glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMappingDepthTexture, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_shadowMappingDepthTexture, 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -413,11 +419,7 @@ namespace Ai
             
             if (RenderPainterVector.size() != 0 || RenderObjectVector.size() != 0)
             {
-                float near_plane = 1.0f, far_plane = 7.5f;
-                glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-                glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-                shaderMappingShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+                shaderMappingShader.setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
 
                 if (g_AiEngineConfig.shadowMapping)
                 {
@@ -430,7 +432,7 @@ namespace Ai
                     // Render the scene
                     for (int i = 0; i < RenderObjectVector.size(); i++)
                     {
-                        shaderMappingShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+                        shaderMappingShader.setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
                         RenderObjectVector[i]->drawShadowMapping(shaderMappingShader);
                     }
 
@@ -599,8 +601,7 @@ namespace Ai
 
                 if (g_AiEngineConfig.antiAliasing)
                 {
-                    //glBindTexture(GL_TEXTURE_2D, screenTexture);
-                    glBindTexture(GL_TEXTURE_2D, shadowMappingDepthTexture);
+                    glBindTexture(GL_TEXTURE_2D, screenTexture);
                 }
                 else
                 {
