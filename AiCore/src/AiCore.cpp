@@ -822,6 +822,15 @@ namespace Ai
         return sp;
     }
 
+    std::shared_ptr<AiQuadNormalMap> addAiQuadNormalMap(std::shared_ptr<Shader>     shader,
+                                                        std::shared_ptr<Texture2D>  diffuseMap,
+                                                        std::shared_ptr<Texture2D>  normalMap)
+    {
+        std::shared_ptr<AiQuadNormalMap> sp = std::make_shared<AiQuadNormalMap>(shader, diffuseMap, normalMap);
+        RenderObjectVector.push_back(sp);
+        return sp;
+    }
+
     std::shared_ptr<ModelObj> addModelObj(std::string path, std::shared_ptr<Shader> shader)
     {
         std::shared_ptr<ModelObj> sp = std::make_shared<ModelObj>(path, shader);

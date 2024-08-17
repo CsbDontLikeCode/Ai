@@ -572,6 +572,84 @@ namespace Ai {
 	// ====================================================================================================
 
 	// ----------------------------------------------------------------------------------------------------
+	// Class AiQuadNormalMap
+	float g_quadPosition[12] = {
+		 0.5f,  0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		-0.5f,  0.5f, 0.0f
+	};
+
+	float g_quadColor[12] = {
+		 1.0f,  0.0f, 0.0f,
+		 0.0f,  1.0f, 0.0f,
+		 0.0f,  0.0f, 1.0f,
+		 1.0f,  1.0f, 0.0f,
+	};
+
+	unsigned int g_quadIndices[6] = {
+		0, 1, 3, // first triangle
+		1, 2, 3  // second triangle
+	};
+
+	AiQuadNormalMap::AiQuadNormalMap(std::shared_ptr<Shader>		shader, 
+									 std::shared_ptr<Texture2D>		diffuseMap, 
+									 std::shared_ptr<Texture2D>		normalMap) :
+		m_shader(shader),
+		m_diffuseMap(diffuseMap),
+		m_normalMap(normalMap)
+	{
+		init();
+	}
+
+	void AiQuadNormalMap::draw()
+	{
+		// Use shader.
+		m_shader->use();
+
+		//glm::mat4 model(1.0f);
+		//model = glm::translate(model, m_translate);
+		//model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		//model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		//model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		//model = glm::scale(model, m_scale);
+		//m_shader->setMat4("model", model);
+		//m_shader->setMat4("view", m_view);
+		//m_shader->setMat4("projection", m_projection);
+
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
+
+	void AiQuadNormalMap::drawShadowMapping(Shader& shader)
+	{
+
+	}
+
+	void AiQuadNormalMap::init()
+	{
+		glGenVertexArrays(1, &m_VAO);
+		glGenBuffers(1, &m_VBO);
+		glGenBuffers(1, &m_EBO);
+		glBindVertexArray(m_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadColor), 0, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_quadPosition), g_quadPosition);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition), sizeof(g_quadColor), g_quadColor);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(g_quadColor)));
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_quadIndices), g_quadIndices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+	// ====================================================================================================
+	
+	// ----------------------------------------------------------------------------------------------------
 	// Class ModelObj
 	unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false)
 	{

@@ -371,6 +371,25 @@ namespace Ai
 		};
 	};
 
+	class AiQuadNormalMap : public AiObject
+	{
+	private:
+		std::shared_ptr<Shader> m_shader;
+
+		std::shared_ptr<Texture2D> m_diffuseMap;
+		std::shared_ptr<Texture2D> m_normalMap;
+	public:
+		AiQuadNormalMap() = delete;
+
+		AiQuadNormalMap(std::shared_ptr<Shader> shader, std::shared_ptr<Texture2D> diffuseMap, std::shared_ptr<Texture2D> normalMap);
+
+		virtual void draw() override;
+
+		virtual void drawShadowMapping(Shader& shader) override;
+	private:
+		virtual void init() override;
+	};
+
 	class ModelObj : public AiObject
 	{
 	public:

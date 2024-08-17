@@ -111,6 +111,11 @@ int main()
 	auto& transparencyObjPos = transparencyObject->getTranslate();
 	transparencyObjPos = glm::vec3(-1.5f, 0.1f, 0.1f);
 
+	// Demo 7 => Render quad object with normal map.
+	std::shared_ptr<Shader> quadNormalMapShader = std::make_shared<Shader>("resources/shaders/nmtest.vs", "resources/shaders/nmtest.fs");
+	auto quadNormalMap = Ai::addAiQuadNormalMap(quadNormalMapShader, diffuseMap, diffuseMap);
+
+
 	// RenderLoop
 	Ai::renderAi();
 
