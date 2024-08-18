@@ -5,6 +5,11 @@ in vec3 Normal;
 in vec3 FragPos; 
 in vec4 FragPosLightSpace;
 
+struct DirLight {
+    vec3 direction;
+    vec3 color;
+};
+
 struct Material {
     vec3 ambient;
     vec3 diffuse;
@@ -12,9 +17,9 @@ struct Material {
     float shininess;
 }; 
 
-uniform vec3 lightPos; 
+uniform DirLight dirLight;
+
 uniform vec3 viewPos;
-uniform vec3 lightColor;
 uniform Material material;
 
 uniform sampler2D shadowMap;
@@ -38,7 +43,6 @@ float ShadowCalculation(vec4 fragPosLightSpace)
         }    
     }
     shadow /= 9.0;
-    // float shadow = currentDepth - 0.01 > closestDepth  ? 1.0 : 0.0;
 
     if(projCoords.z > 1.0)
         shadow = 0.0;
@@ -50,13 +54,13 @@ void main()
 {
     // ambient
     float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = ambientStrength * dirLight.color;
   	
     // diffuse 
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 lightDir = normalize(-dirLight.direction);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = diff * dirLight.color;
     
     // specular
     float specularStrength = 0.5;
@@ -69,7 +73,7 @@ void main()
     // Phong Shading
     // vec3 reflectDir = reflect(-lightDir, norm);  
     // spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = specularStrength * spec * lightColor; 
+    vec3 specular = specularStrength * spec * dirLight.color; 
 
     // Calculate shadow.
     float shadow = ShadowCalculation(FragPosLightSpace);         

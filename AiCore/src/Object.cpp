@@ -375,8 +375,8 @@ namespace Ai {
 		m_shader->setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
 
 		// Set lighting calculation items.
-		m_shader->setVec3("lightPos", m_lightSource->getPosition());
-		m_shader->setVec3("lightColor", m_lightSource->getColor());
+		m_shader->setVec3("dirLight.direction", g_dirLight.m_direction);
+		m_shader->setVec3("dirLight.color", g_dirLight.m_color);
 		m_shader->setVec3("viewPos", camera.Position);
 
 		m_shader->setVec3("material.ambient", m_material.ambient);
@@ -580,11 +580,11 @@ namespace Ai {
 		-0.5f,  0.5f, 0.0f
 	};
 
-	float g_quadColor[12] = {
-		 1.0f,  0.0f, 0.0f,
-		 0.0f,  1.0f, 0.0f,
-		 0.0f,  0.0f, 1.0f,
-		 1.0f,  1.0f, 0.0f,
+	float g_quadTexCoord[8] = {
+		 1.0f,  1.0f,
+		 1.0f,  0.0f,
+		 0.0f,  0.0f,
+		 0.0f,  1.0f
 	};
 
 	unsigned int g_quadIndices[6] = {
@@ -606,25 +606,45 @@ namespace Ai {
 	{
 		// Use shader.
 		m_shader->use();
-
-		//glm::mat4 model(1.0f);
-		//model = glm::translate(model, m_translate);
-		//model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
-		//model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
-		//model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
-		//model = glm::scale(model, m_scale);
-		//m_shader->setMat4("model", model);
-		//m_shader->setMat4("view", m_view);
-		//m_shader->setMat4("projection", m_projection);
+		// ------------------------------------------------------------------------------
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		m_shader->setMat4("model", model);
+		m_shader->setMat4("view", m_view);
+		m_shader->setMat4("projection", m_projection);
+		// ------------------------------------------------------------------------------
+		m_shader->setInt("DiffuseMap", 0);
+		m_shader->setInt("NormalMap", 1);
+		glActiveTexture(GL_TEXTURE0);
+		m_diffuseMap->bind();
+		glActiveTexture(GL_TEXTURE1);
+		m_normalMap->bind();
+		// ------------------------------------------------------------------------------
+		m_shader->setVec3("dirLight.direction", g_dirLight.m_direction);
+		m_shader->setVec3("dirLight.color", g_dirLight.m_color);
+		m_shader->setVec3("viewPos", camera.Position);
 
 		glBindVertexArray(m_VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 
 	void AiQuadNormalMap::drawShadowMapping(Shader& shader)
 	{
+		shader.use();
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, m_translate);
+		model = glm::rotate(model, glm::radians(m_rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::rotate(model, glm::radians(m_rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		model = glm::scale(model, m_scale);
+		shader.setMat4("model", model);
 
+		glBindVertexArray(m_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
 	void AiQuadNormalMap::init()
@@ -634,12 +654,12 @@ namespace Ai {
 		glGenBuffers(1, &m_EBO);
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadColor), 0, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadTexCoord), 0, GL_STATIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_quadPosition), g_quadPosition);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition), sizeof(g_quadColor), g_quadColor);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(g_quadColor)));
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition), sizeof(g_quadTexCoord), g_quadTexCoord);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(g_quadPosition)));
 		glEnableVertexAttribArray(1);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);

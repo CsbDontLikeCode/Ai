@@ -12,13 +12,13 @@ namespace Ai
         
     // Global light source
     // 1.Directional light
-    DirLight g_dirLight = { {-0.2f, -1.0f, -0.3f}, {1.0f, 1.0f, 1.0f} };
+    DirLight g_dirLight = { {-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f} };
     // 2.Point light container
     std::vector<SceneLight> g_pointLights;
 
     float near_plane = 1.0f, far_plane = 7.5f;
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 lightView = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 g_lightSpaceMatrix = lightProjection * lightView;
 
     unsigned int g_shadowMappingDepthTexture;

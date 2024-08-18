@@ -37,7 +37,7 @@ int main()
 
 	auto tex2 = Ai::addTex(9, "azibao", "resources/textures/azibao.jpg");
 	auto& translation = tex2->getTranslate();
-	translation.x = 2.0f;
+	translation.x = 1.0f;
 	std::thread t2(rotateTex, tex);
 	t2.detach();
 
@@ -78,7 +78,7 @@ int main()
 	auto& quadLMPosition = quadLM->getTranslate();
 	quadLMPosition.x = -1.5f;
 
-	Ai::setDirLight({ -0.2f, -1.0f, -0.3f }, {0.0f, 0.0f, 0.0f});
+	// Ai::setDirLight({ -1.0f, -1.0f, -1.0f }, {1.0f, 1.0f, 1.0f});
 	auto& pl1 = Ai::getPointLight(1);
 	pl1.m_position = { -2.0f, -0.5f, 1.0f};
 	pl1.m_color = { 1.0f, 0.0f, 0.0f };
@@ -112,8 +112,13 @@ int main()
 	transparencyObjPos = glm::vec3(-1.5f, 0.1f, 0.1f);
 
 	// Demo 7 => Render quad object with normal map.
-	std::shared_ptr<Shader> quadNormalMapShader = std::make_shared<Shader>("resources/shaders/nmtest.vs", "resources/shaders/nmtest.fs");
-	auto quadNormalMap = Ai::addAiQuadNormalMap(quadNormalMapShader, diffuseMap, diffuseMap);
+	std::shared_ptr<Shader> quadNormalMapShader = std::make_shared<Shader>("resources/shaders/NormalMapQuad/vertex.vs", 
+																		   "resources/shaders/NormalMapQuad/fragment.fs");
+	std::shared_ptr<Texture2D> quadDiffuseTex = std::make_shared<Texture2D>("resources/textures/NormalMap/brickwall.jpg");
+	std::shared_ptr<Texture2D> quadNormalTex = std::make_shared<Texture2D>("resources/textures/NormalMap/brickwall_normal.jpg");
+	auto quadNormalMap = Ai::addAiQuadNormalMap(quadNormalMapShader, quadDiffuseTex, quadNormalTex);
+	auto& quadNormalMapTrans = quadNormalMap->getTranslate();
+	quadNormalMapTrans = {1.0f, 0.0f, 1.5f};
 
 
 	// RenderLoop
