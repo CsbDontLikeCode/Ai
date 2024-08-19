@@ -119,7 +119,8 @@ int main()
 	auto quadNormalMap = Ai::addAiQuadNormalMap(quadNormalMapShader, quadDiffuseTex, quadNormalTex);
 	auto& quadNormalMapTrans = quadNormalMap->getTranslate();
 	quadNormalMapTrans = {1.0f, 0.0f, 1.5f};
-
+	auto& quadNormalMapRotate = quadNormalMap->getRotate();
+	quadNormalMapRotate.y = 90.0f;
 
 	// RenderLoop
 	Ai::renderAi();

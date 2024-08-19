@@ -1,7 +1,10 @@
 #version 330 core
 
 in vec3 FragPos;
+in vec3 VexNormal;
 in vec2 TexCoord;
+
+in mat3 TBN;
 
 out vec4 FragColor;
 
@@ -22,6 +25,7 @@ void main()
 {
 	vec3 normal = texture(NormalMap, TexCoord).rgb;
     normal = normalize(normal * 2.0 - 1.0);
+    normal = normalize(TBN * normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
 

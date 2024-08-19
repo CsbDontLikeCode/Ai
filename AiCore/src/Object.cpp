@@ -580,11 +580,32 @@ namespace Ai {
 		-0.5f,  0.5f, 0.0f
 	};
 
+	float g_quadNormal[12] = {
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f
+	};
+
 	float g_quadTexCoord[8] = {
 		 1.0f,  1.0f,
 		 1.0f,  0.0f,
 		 0.0f,  0.0f,
 		 0.0f,  1.0f
+	};
+
+	float g_quadTangent[12] = {
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+	};
+
+	float g_quadBitangent[12] = {
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
 	};
 
 	unsigned int g_quadIndices[6] = {
@@ -654,13 +675,25 @@ namespace Ai {
 		glGenBuffers(1, &m_EBO);
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadTexCoord), 0, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadNormal) + sizeof(g_quadTexCoord)
+			+ sizeof(g_quadTangent) + sizeof(g_quadBitangent), 0, GL_STATIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_quadPosition), g_quadPosition);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition), sizeof(g_quadTexCoord), g_quadTexCoord);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(g_quadPosition)));
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition), sizeof(g_quadNormal), g_quadNormal);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(g_quadPosition)));
 		glEnableVertexAttribArray(1);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadNormal), sizeof(g_quadTexCoord), g_quadTexCoord);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(g_quadPosition) + sizeof(g_quadNormal)));
+		glEnableVertexAttribArray(2);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadNormal) + sizeof(g_quadTexCoord), sizeof(g_quadTangent), g_quadTangent);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(g_quadPosition) + sizeof(g_quadNormal) + sizeof(g_quadTexCoord)));
+		glEnableVertexAttribArray(3);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(g_quadPosition) + sizeof(g_quadNormal) + sizeof(g_quadTexCoord) + sizeof(g_quadTangent)
+			, sizeof(g_quadBitangent), g_quadBitangent);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(g_quadPosition) + sizeof(g_quadNormal) + sizeof(g_quadTexCoord)
+			+ sizeof(g_quadTangent)));
+		glEnableVertexAttribArray(4);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_quadIndices), g_quadIndices, GL_STATIC_DRAW);
