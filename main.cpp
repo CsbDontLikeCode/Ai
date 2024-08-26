@@ -34,7 +34,7 @@ int main()
 	std::shared_ptr<Ai::AiTexQuadObject> tex = Ai::addTex(8, "azibao", "resources/textures/azi1.jpg");
 	auto& posAzi = tex->getTranslate();
 	posAzi.z = 0.5f;
-
+	
 	auto tex2 = Ai::addTex(9, "azibao", "resources/textures/azibao.jpg");
 	auto& translation = tex2->getTranslate();
 	translation.x = 1.0f;

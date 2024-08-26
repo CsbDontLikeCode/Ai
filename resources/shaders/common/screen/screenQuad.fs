@@ -1,9 +1,10 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
+uniform sampler2D bloomBlur;
 
 void main()
 {   
@@ -23,9 +24,6 @@ void main()
     //float average = (FragColor.r + FragColor.g + FragColor.b) / 3.0;
     //FragColor = vec4(average, average, average, 1.0);
 
-
-
-
     // HDR 
     // const float gamma = 2.2;
     // vec3 hdrColor = texture(screenTexture, TexCoords).rgb;
@@ -34,7 +32,10 @@ void main()
     // FragColor = vec4(mapped, 1.0);
 
     const float gamma = 2.2;
-    vec3 hdrColor = texture(screenTexture, TexCoords).rgb;
+    vec3 hdrColor = texture(screenTexture, TexCoords).rgb;  
+    vec3 bloomColor = texture(bloomBlur, TexCoords).rgb;
+    hdrColor += bloomColor; // additive blending
+
     float exposure = 1.5;
     vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
     mapped = pow(mapped, vec3(1.0 / gamma));
