@@ -376,25 +376,21 @@ namespace Ai
                 std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+        
+        glGenFramebuffers(1, &shadowMappingFramebuffer);
+        glGenTextures(1, &g_shadowMappingDepthTexture);
+        glBindTexture(GL_TEXTURE_2D, g_shadowMappingDepthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        if (g_AiEngineConfig.shadowMapping)
-        {
-            glGenFramebuffers(1, &shadowMappingFramebuffer);
-
-            glGenTextures(1, &g_shadowMappingDepthTexture);
-            glBindTexture(GL_TEXTURE_2D, g_shadowMappingDepthTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_shadowMappingDepthTexture, 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_shadowMappingDepthTexture, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // ----------------------------------------------------------------------
         // Generate and bind framebuffer.
@@ -474,23 +470,20 @@ namespace Ai
             {
                 shaderMappingShader.setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
 
-                if (g_AiEngineConfig.shadowMapping)
+                // Rendering shadow mapping depth texture first.
+                glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                glEnable(GL_DEPTH_TEST);
+                
+                // Render the scene
+                for (int i = 0; i < RenderObjectVector.size(); i++)
                 {
-                    // Rendering shadow mapping depth texture first.
-                    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-                    glBindFramebuffer(GL_FRAMEBUFFER, shadowMappingFramebuffer);
-                    glClear(GL_DEPTH_BUFFER_BIT);
-                    glEnable(GL_DEPTH_TEST);
-                    
-                    // Render the scene
-                    for (int i = 0; i < RenderObjectVector.size(); i++)
-                    {
-                        shaderMappingShader.setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
-                        RenderObjectVector[i]->drawShadowMapping(shaderMappingShader);
-                    }
-
-                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                    shaderMappingShader.setMat4("lightSpaceMatrix", g_lightSpaceMatrix);
+                    RenderObjectVector[i]->drawShadowMapping(shaderMappingShader);
                 }
+
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
                 // Bind the off-screen framebuffer.
                 if (g_AiEngineConfig.offScreenRenderingFlag)
@@ -703,6 +696,9 @@ namespace Ai
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+        // Delete the buffers.
+        glDeleteVertexArrays(1, &g_line.VAO);
+        glDeleteBuffers(1, &g_line.VBO);
         glDeleteVertexArrays(1, &g_triangle.VAO);
         glDeleteBuffers(1, &g_triangle.VBO);
         glDeleteVertexArrays(1, &g_square.VAO);
