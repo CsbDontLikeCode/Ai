@@ -713,6 +713,11 @@ namespace Ai
         {
             glDeleteProgram(iter->second);
         }
+        // Delete framebuffers.
+        glDeleteFramebuffers(1, &offScreenFramebuffer);
+        glDeleteFramebuffers(1, &shadowMappingFramebuffer);
+        glDeleteFramebuffers(1, &bloomingFramebuffer);
+        glDeleteFramebuffers(2, bloomingBlurFramebuffer);
 
         glfwTerminate();
     }
